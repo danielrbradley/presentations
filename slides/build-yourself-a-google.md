@@ -107,6 +107,10 @@ Doesn't `ctrl`+`F` work pretty well?
 
 ---
 
+![Banana](images/banana.gif)
+
+---
+
 ### 3 documents with 1 sentence in each
 
     [lang=js]
@@ -505,7 +509,7 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 
 ## Phrases
 
-`"something good"`
+`"a banana"`
 
 ' How do we check if words are near each other?
 
@@ -553,12 +557,17 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 
 **
 
+    [lang=cs]
+    Words.Sum(Default(Boost, 1)) * Doc.Boost
+
+**
+
     [lang=js]
     var index = {
       "a": [{doc:"C", score:1}],
       "banana": [{ doc:"C", score:5}],
       "is": [{doc:"A", score:2}, {doc:"B", score:2}, {doc:"C", score:1}],
-      "it": [{doc:"A", score:2}, {doc:"B", score:5}, {doc:"C", score:1}],
+      "it": [{doc:"A", score:2}, {doc:"B", score:2}, {doc:"C", score:1}],
       "what": [{doc:"A", score:1}, {doc:"B", score:2}]
     };
 
