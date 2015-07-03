@@ -8,9 +8,11 @@
 
 ## Build Yourself A Google
 
-![DIY](images/meme-diy.jpg)
-
 ' Aim: remove some magic
+
+---
+
+![DIY](images/magic.gif)
 
 ***
 
@@ -63,11 +65,12 @@ Find information quickly and efficiently
 
 ---
 
-Let's focus on commonalities that make search possible
-
-All this material revolves around the Apache Lucene library.
+### How does search work?
 
 ![Lucene](https://lucene.apache.org/images/lucene_logo_green_300.png)
+
+' Commonalities that make search possible
+' Can be done with open source - Lucene
 
 ***
 
@@ -79,6 +82,9 @@ All this material revolves around the Apache Lucene library.
 
 ## What's the problem?
 Doesn't `ctrl`+`F` work pretty well?
+
+' Open up folder search in atom?
+' Just make bigger/more machine?
 
 ---
 
@@ -102,12 +108,14 @@ Doesn't `ctrl`+`F` work pretty well?
 
 *We need to 'invert the index'*
 
-' Indexes: find information quickly
+' Indexes: find information quickly (looking up)
 ' Inverted index: lets see ...
 
 ---
 
 ![Banana](images/banana.gif)
+
+' Using a minion-themed example
 
 ---
 
@@ -190,7 +198,9 @@ Which documents match the following searches:
 
 ### Now we've finished the intro...
 
-' In the real world, there's a bit more to it than just words
+' Real world: bit more than just words
+' Go back and look at details
+' Look at fun (geeky) stuff
 
 ***
 
@@ -302,13 +312,15 @@ e.g. Path hierarchy
 
 ### Stemming errors
 
-- `ran`/`run` ⇨ ...
+- `ran`/`run` ⇨ ??
 - `universal`|`university` ⇨ `univers`
-
-![Computer says no](images/computer-says-no.gif)
 
 ' Overstemming/Understemming
 ' Fairly specific per-language
+
+---
+
+![Computer says no](images/computer-says-no.gif)
 
 ---
 
@@ -318,10 +330,12 @@ W300, C640, S512, B634, P362, S534
 
 N350, B200, M635, S530, P252, M236
 
+' Index by phonetic pronunciation
 ' Remove: a e i o u y h w
 ' Replace letters with a numbers
 ' b|f|p|v=1 d|t=3, l=4, m|n=5, r=6 others=2
 ' Remove duplicates
+' Donald Knuth's The Art of Computer Programming
 
 ***
 
@@ -339,11 +353,11 @@ N350, B200, M635, S530, P252, M236
 
     [lang=js]
     var email = {
-      from: "bob@hotmail.com",
-      to: "dan@gmail.com",
+      from: "stuart@minions.com",
+      to: "kevin@minions.com",
       sentAt: "2015-06-25T16:52:35Z"
-      subject: "re: that thing"
-      body: "What's up?"
+      subject: "re: what is it?"
+      body: "It is a banana."
     };
 
 ' -
@@ -374,15 +388,17 @@ Create separate indexes per field
         "it": ["docA", "docB", "docC"],
         "what": ["docA", "docB"]
       },
-      subject: {
+      "subject": {
         "a": ["docA"],
         "build": ["docA"],
         "google": ["docA"],
         "yourself": ["docA"]
-      }
+      },
+      ...
     };
 
 ' Adding fields is cheap
+' Documents have different fields
 
 ---
 
@@ -396,7 +412,15 @@ Create separate indexes per field
 
 ***
 
-## More Queries
+## How queries actually work
+
+' Ok, might have oversimplified
+' Use OR by default
+' Everything not required - SHOULD
+
+---
+
+### More Queries
 
 Query: `it ate the banana`
 
@@ -409,22 +433,23 @@ Query: `it ate the banana`
       "what": ["docA", "docB"]
     };
 
-Use OR by default
-
 ' What results should we get?
 ' Rank document higher with more matches
 ' If counting word hits, should we count words per document?
-' Treat each part as optional (SHOULD)
 
 ***
 
 ## Denormalisation
 
+' Create duplicate data for different search purposes
+
+---
+
 ### More uses for fields
 
     [lang=js]
     var document = {
-      "original": "BaNaNa"
+      "original": "BaNaNaS"
     };
 
 ⇩
@@ -448,8 +473,15 @@ Query: `banana`
 
 Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 
+---
+
+## Rewritten example
+
+`lowered:banana OR stemmed:banana OR soundex:B500`
+
     [lang=js]
     var document = {
+      "original": "BaNaNaS",
       "lowered": "bananas",
       "stemmed": "banana",
       "soundex": "B500"
@@ -463,12 +495,17 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 
 ### Issus with fuzzy matching
 
-`original:banana OR stemmed:banana OR soundex:B500`
-
     [lang=js]
-    var documents = {"A":"BaNaNas", "B":"Ben been booming"};
+    var documents = {
+      "A":"BaNaNas",
+      "B":"Ben been booming"
+    };
 
-**
+---
+
+### Fuzzy matching issue example
+
+`lowered:banana OR stemmed:banana OR soundex:B500`
 
     [lang=js]
     var index = {
@@ -481,11 +518,19 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
       "soundex": {
         "B500": ["A", "B", "B", "B"]
       }};
+
 ' More interested in exact match
+' How do we solve?
 
 ---
 
 ## Weighting
+
+![Weighting fail](images/weighting.gif)
+
+' Focus on what we're more interested in
+
+---
 
 `(original:banana)^2 OR (stemmed:banana)^1 OR (soundex:B500)^0.1`
 
@@ -504,6 +549,10 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 ***
 
 # Richer Indexes
+
+' Focused on how we change the terms we put into index
+' What's useful to add to the index.
+' More than just document IDs.
 
 ---
 
@@ -548,17 +597,19 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 
 ### Index Boosting
 
+
+
+    [lang=cs]
+    Words.Sum(Default(Boost, 1)) * Doc.Boost
+
+---
+
     [lang=js]
     var documents = {
       "A": { words: ["it", "is", "what", "it", "is"] },
       "B": { words:  ["what", "is", "it"], boost: 2 },
       "C": { words: ["it", "is", "a", { word: "banana", boost: 5 }] }
     };
-
-**
-
-    [lang=cs]
-    Words.Sum(Default(Boost, 1)) * Doc.Boost
 
 **
 
@@ -577,13 +628,18 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
 
 ### Default Field Stuffing
 
+' Query rewriting can make things slow
+' Users don't want to have
+
+---
+
     [lang=js]
     var email = {
-      from: "bob@hotmail.com",
-      to: "dan@gmail.com",
+      from: "stuart@minions.com",
+      to: "kevin@minions.com",
       sentAt: "2015-06-25T16:52:35Z"
-      subject: "re: that thing"
-      body: "What's up?"
+      subject: "re: what is it?"
+      body: "It is a banana."
     };
 
 **
@@ -591,13 +647,14 @@ Rewritten Query: `lowered:banana OR stemmed:banana OR soundex:B500`
     [lang=js]
     var email = {
       "default": [
-        "bob@hotmail.com", "dan@gmail.com",
-        "re: that thing", "What's up?"]
-      from: "bob@hotmail.com",
-      to: "dan@gmail.com",
+        "stuart", "minions.com", "kevin"
+        "stuart@minions.com", "kevin@minions.com",
+        "re: what is it?", "It is a banana."]
+      from: "stuart@minions.com",
+      to: "kevin@minions.com",
       sentAt: "2015-06-25T16:52:35Z"
-      subject: "re: that thing"
-      body: "What's up?"
+      subject: "re: what is it?"
+      body: "It is a banana."
     };
 
 ' Default is to search (almost) everything
